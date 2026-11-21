@@ -21,9 +21,58 @@ function printSale(s){if(!s)return;let r=$("receipt");r.innerHTML=receiptHTML(s)
 function whatsappSale(s){if(!s)return;let lines=["*Aashirwaad Super Mart*","Bill: "+s.billNo,"Date: "+new Date(s.createdAt).toLocaleString(),"Customer: "+(s.customer||"Walk-in"),"--------------------",...s.items.map(x=>`${x.name}  ${x.qty} x ${money(x.price)} = ${money(x.qty*x.price)}`),"--------------------","*Total: "+money(s.total)+"*","Payment: "+s.payment,"Thank you for shopping!"];let url="https://wa.me/?text="+encodeURIComponent(lines.join("\\n"));window.open(url,"_blank")}
 $("printLast").onclick=()=>printSale(lastSale);$("whatsappLast").onclick=()=>whatsappSale(lastSale);
 async function renderSales(){let ss=(await all("sales")).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));$("salesList").className="list"+(ss.length?"":" empty");$("salesList").innerHTML=ss.length?ss.map(s=>`<div class="item"><div><b>${esc(s.billNo)}</b><small>${new Date(s.createdAt).toLocaleString()} · ${esc(s.payment)}</small></div><div><b>${money(s.total)}</b><br><button data-print="${s.id}">Print</button> <button data-wa="${s.id}">WhatsApp</button></div></div>`).join(""):"No sales yet";$("salesList").querySelectorAll("[data-print]").forEach(b=>b.onclick=async()=>printSale(await get("sales",b.dataset.print)));$("salesList").querySelectorAll("[data-wa]").forEach(b=>b.onclick=async()=>whatsappSale(await get("sales",b.dataset.wa)))}
-async function cameraStart(){if(!("BarcodeDetector"in window)){ $("cameraMsg").textContent="Camera barcode scanning is not supported by this browser. Use a Bluetooth/USB barcode scanner in keyboard mode or type the barcode.";return}try{let detector=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e","code_128","code_39","itf"]});cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false});$("camera").srcObject=cameraStream;$("camera").classList.remove("hidden");await $("camera").play();$("stopCamera").disabled=false;$("cameraMsg").textContent="Point the camera at a barcode.";const scan=async()=>{if(!cameraStream)return;try{let codes=await detector.detect($("camera"));if(codes.length){$("scanCode").value=codes[0].rawValue;await stopCamera();await addBarcode();return}}catch(e){}scanLoop=requestAnimationFrame(scan)};scan()}catch(e){$("cameraMsg").textContent="Could not open camera. Allow camera access and use HTTPS. "+e.message}}
-async function stopCamera(){if(scanLoop)cancelAnimationFrame(scanLoop);scanLoop=null;if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null}$("camera").srcObject=null;$("camera").classList.add("hidden");$("stopCamera").disabled=true}
-$("cameraScan").onclick=cameraStart;$("stopCamera").onclick=stopCamera;
+let barcodeModal=null,barcodeReader=null,barcodeControls=null,barcodeTarget=null;
+function loadZXing(){
+ if(window.ZXing&&window.ZXing.BrowserMultiFormatReader)return Promise.resolve(window.ZXing);
+ if(window.__aashirwaadZXingPromise)return window.__aashirwaadZXingPromise;
+ window.__aashirwaadZXingPromise=new Promise((resolve,reject)=>{
+  const script=document.createElement("script");
+  script.src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";
+  script.async=true;
+  script.onload=()=>window.ZXing&&window.ZXing.BrowserMultiFormatReader?resolve(window.ZXing):reject(new Error("Barcode library did not initialize"));
+  script.onerror=()=>reject(new Error("Could not download barcode scanner. Connect to internet once and retry."));
+  document.head.appendChild(script);
+ });
+ return window.__aashirwaadZXingPromise;
+}
+function stopCamera(){
+ try{if(barcodeControls&&barcodeControls.stop)barcodeControls.stop()}catch(e){}
+ barcodeControls=null;
+ try{if(barcodeReader&&barcodeReader.reset)barcodeReader.reset()}catch(e){}
+ barcodeReader=null;
+ if(barcodeModal){barcodeModal.remove();barcodeModal=null;}
+ barcodeTarget=null;
+}
+async function cameraStart(targetId){
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.isSecureContext){alert("Camera scan ke liye GitHub Pages ka HTTPS URL Safari mein kholen aur Camera permission allow karein.");return}
+ stopCamera();barcodeTarget=targetId;
+ const modal=document.createElement("div");modal.className="scanner-overlay";barcodeModal=modal;
+ const title=document.createElement("b");title.textContent="Aashirwaad — Barcode Scanner";
+ const video=document.createElement("video");video.setAttribute("playsinline","");video.setAttribute("autoplay","");video.muted=true;
+ const status=document.createElement("div");status.className="scan-status";status.textContent="Scanner load ho raha hai… Internet connection zaroori ho sakta hai pehli baar.";
+ const close=document.createElement("button");close.textContent="Close scanner";close.onclick=stopCamera;
+ modal.append(title,video,status,close);document.body.append(modal);
+ try{
+  const ZX=await loadZXing();if(barcodeModal!==modal)return;
+  barcodeReader=new ZX.BrowserMultiFormatReader();
+  status.textContent="Camera permission allow karein, phir barcode ko frame mein rakhein.";
+  barcodeControls=await barcodeReader.decodeFromVideoDevice(undefined,video,(result,err)=>{
+   if(!result||barcodeModal!==modal)return;
+   const code=result.getText();const target=$(targetId);
+   if(!target)return;
+   target.value=code;target.dispatchEvent(new Event("input",{bubbles:true}));target.dispatchEvent(new Event("change",{bubbles:true}));
+   status.textContent="Barcode scanned: "+code;
+   stopCamera();target.focus();
+   if(targetId==="scanCode")addBarcode();
+  });
+  status.textContent="Barcode ko camera ke beech mein rakhein. Focus hone tak phone steady rakhein.";
+ }catch(e){
+  status.textContent="Camera scanner start nahi hua: "+(e.message||e)+". Safari Settings mein Camera permission check karein, internet on karke retry karein.";
+  const retry=document.createElement("button");retry.textContent="Retry";retry.onclick=()=>cameraStart(targetId);modal.insertBefore(retry,close);
+ }
+}
+$("cameraScan").onclick=()=>cameraStart("scanCode");
+$("productCameraScan").onclick=()=>cameraStart("pBarcode");
 async function saveSettings(){await put("settings",{key:"apiUrl",value:$("apiUrl").value.trim().replace(/\/$/,"")});await put("settings",{key:"syncToken",value:$("syncToken").value.trim()});$("settingsMessage").textContent="Settings saved on this device.";updateStatus()}
 async function syncNow(){if(!navigator.onLine){$("settingsMessage").textContent="Offline: changes remain saved locally.";return}let url=(await get("settings","apiUrl"))?.value,token=(await get("settings","syncToken"))?.value;if(!url||!token){$("settingsMessage").textContent="Cloud sync server is not configured yet. Local billing works.";return}try{let pending=await all("outbox");if(!pending.length){$("settingsMessage").textContent="No pending changes.";return}let res=await fetch(url+"/sync",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({events:pending})});if(!res.ok)throw Error("Server error "+res.status);let result=await res.json(),tx=db.transaction("outbox","readwrite");pending.forEach(e=>tx.objectStore("outbox").delete(e.eventId));await new Promise((a,b)=>{tx.oncomplete=a;tx.onerror=()=>b(tx.error)});$("settingsMessage").textContent="Uploaded "+(result.accepted??pending.length)+" event(s). Cloud download/sync-back still needs implementation.";updateStatus()}catch(e){$("settingsMessage").textContent="Sync failed; local data is safe. "+e.message}}
 async function exportData(){let data={products:await all("products"),sales:await all("sales"),outbox:await all("outbox"),exportedAt:new Date().toISOString()},blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="aashirwaad-pos-backup.json";a.click();URL.revokeObjectURL(a.href)}

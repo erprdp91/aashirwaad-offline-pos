@@ -13,7 +13,7 @@
 <section id="billing" class="panel">
 <h2>New bill</h2>
 <div class="row"><input id="scanCode" placeholder="Scan / enter barcode" autocomplete="off"><button id="addCode">Add</button></div>
-<div class="row"><button id="cameraScan" class="secondary">Scan with camera</button><button id="stopCamera" class="secondary" disabled>Stop camera</button></div><video id="camera" playsinline muted class="camera hidden"></video><div id="cameraMsg" class="hint"></div>
+<div class="row"><button id="cameraScan" class="secondary">📷 Scan barcode with camera</button></div><div id="cameraMsg" class="hint">Camera scan works on HTTPS. Allow camera access when Safari asks.</div>
 <div class="row"><input id="quickName" placeholder="Quick item name"><input id="quickPrice" type="number" min="0" step="0.01" placeholder="Price ₹"><button id="quickAdd">+</button></div>
 <div id="cart" class="list empty">Cart is empty</div><div class="total"><span>Total</span><strong id="total">₹0.00</strong></div>
 <div class="row"><select id="payment"><option>Cash</option><option>UPI</option><option>Card</option><option>Credit</option></select><input id="customer" placeholder="Customer name / phone (optional)"></div>
@@ -23,7 +23,7 @@
 </section>
 <section id="products" class="panel hidden">
 <h2>Add product</h2><div class="formgrid">
-<input id="pBarcode" placeholder="Barcode number (scan here or type)" autocomplete="off"><input id="pName" placeholder="Product name"><div class="row"><input id="pPrice" type="number" min="0" step="0.01" placeholder="Selling price ₹"><input id="pCost" type="number" min="0" step="0.01" placeholder="Purchase cost ₹"></div>
+<div class="scanfield"><input id="pBarcode" placeholder="Barcode number (scan here or type)" autocomplete="off"><button type="button" id="productCameraScan" class="secondary">📷 Scan barcode with camera</button></div><input id="pName" placeholder="Product name"><div class="row"><input id="pPrice" type="number" min="0" step="0.01" placeholder="Selling price ₹"><input id="pCost" type="number" min="0" step="0.01" placeholder="Purchase cost ₹"></div>
 <div class="row"><input id="pStock" type="number" min="0" step="1" placeholder="Opening stock"><input id="pExpiry" type="date" aria-label="Expiry date"></div>
 <button id="saveProduct" class="primary full">Save product on this device</button></div><div id="productList" class="list"></div>
 </section>
@@ -33,7 +33,7 @@
 <hr><button id="exportData" class="secondary full">Export local backup (JSON)</button><div id="settingsMessage" class="hint"></div>
 </section>
 </main>
-<footer>Prototype v2 • Use dummy data until full sync and printer testing are complete.</footer>
+<footer>Prototype v3 • Use dummy data until full sync and printer testing are complete.</footer>
 <div id="receipt" class="receipt"></div>
 <script src="app.js"></script>
 </body></html>
