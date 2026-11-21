@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14532d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Aashirwaad POS">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="stylesheet" href="style.css"><title>Aashirwaad POS</title>
+</head>
+<body>
+<header><div><strong>Aashirwaad Super Mart</strong><small>Offline-first POS • iPhone prototype v2</small></div><span id="network" class="pill">Checking…</span></header>
+<main>
+<section class="status"><div><small>Sync status</small><strong id="syncStatus">Local only</strong></div><div><small>Pending changes</small><strong id="pendingCount">0</strong></div><button id="syncNow" class="secondary">Sync now</button></section>
+<nav><button class="tab active" data-tab="billing">Billing</button><button class="tab" data-tab="products">Products</button><button class="tab" data-tab="history">Sales</button><button class="tab" data-tab="settings">Settings</button></nav>
+<section id="billing" class="panel">
+<h2>New bill</h2>
+<div class="row"><input id="scanCode" placeholder="Scan / enter barcode" autocomplete="off"><button id="addCode">Add</button></div>
+<div class="row"><button id="cameraScan" class="secondary">📷 Scan barcode with camera</button></div><div id="cameraMsg" class="hint">Camera scan works on HTTPS. Allow camera access when Safari asks.</div>
+<div class="row"><input id="quickName" placeholder="Quick item name"><input id="quickPrice" type="number" min="0" step="0.01" placeholder="Price ₹"><button id="quickAdd">+</button></div>
+<div id="cart" class="list empty">Cart is empty</div><div class="total"><span>Total</span><strong id="total">₹0.00</strong></div>
+<div class="row"><select id="payment"><option>Cash</option><option>UPI</option><option>Card</option><option>Credit</option></select><input id="customer" placeholder="Customer name / phone (optional)"></div>
+<button id="completeSale" class="primary full">Complete sale (save offline)</button>
+<div class="row actionrow"><button id="printLast" class="secondary" disabled>Print last bill</button><button id="whatsappLast" class="secondary" disabled>WhatsApp last bill</button></div>
+<p class="hint">Barcode scanners that type into the barcode field (USB/Bluetooth keyboard mode) are supported. Camera scan depends on iPhone browser support and HTTPS.</p>
+</section>
+<section id="products" class="panel hidden">
+<h2>Add product</h2><div class="formgrid">
+<div class="scanfield"><input id="pBarcode" placeholder="Barcode number (scan here or type)" autocomplete="off"><button type="button" id="productCameraScan" class="secondary">📷 Scan barcode with camera</button></div><input id="pName" placeholder="Product name"><div class="row"><input id="pPrice" type="number" min="0" step="0.01" placeholder="Selling price ₹"><input id="pCost" type="number" min="0" step="0.01" placeholder="Purchase cost ₹"></div>
+<div class="row"><input id="pStock" type="number" min="0" step="1" placeholder="Opening stock"><input id="pExpiry" type="date" aria-label="Expiry date"></div>
+<button id="saveProduct" class="primary full">Save product on this device</button></div><div id="productList" class="list"></div>
+</section>
+<section id="history" class="panel hidden"><h2>Saved sales</h2><div id="salesList" class="list empty">No sales yet</div></section>
+<section id="settings" class="panel hidden">
+<h2>Sync settings</h2><label>Cloud sync API URL</label><input id="apiUrl" placeholder="https://your-worker.workers.dev"><label>Sync token</label><input id="syncToken" type="password" placeholder="Set by administrator"><button id="saveSettings" class="primary full">Save sync settings</button><p class="hint">Cloud sync is not yet deployed in this prototype. Leave blank for offline testing.</p>
+<hr><button id="exportData" class="secondary full">Export local backup (JSON)</button><div id="settingsMessage" class="hint"></div>
+</section>
+</main>
+<footer>Prototype v3 • Use dummy data until full sync and printer testing are complete.</footer>
+<div id="receipt" class="receipt"></div>
+<script src="app.js"></script>
+</body></html>
