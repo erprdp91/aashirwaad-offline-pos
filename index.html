@@ -6,14 +6,14 @@
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="stylesheet" href="style.css"><title>Aashirwaad POS</title>
 </head>
 <body>
-<header><div><strong>Aashirwaad Super Mart</strong><small>Offline-first POS • iPhone prototype v2</small></div><span id="network" class="pill">Checking…</span></header>
+<header><div><strong>Aashirwaad Super Mart</strong><small>Offline-first POS • iPhone prototype v4</small></div><span id="network" class="pill">Checking…</span></header>
 <main>
 <section class="status"><div><small>Sync status</small><strong id="syncStatus">Local only</strong></div><div><small>Pending changes</small><strong id="pendingCount">0</strong></div><button id="syncNow" class="secondary">Sync now</button></section>
 <nav><button class="tab active" data-tab="billing">Billing</button><button class="tab" data-tab="products">Products</button><button class="tab" data-tab="history">Sales</button><button class="tab" data-tab="settings">Settings</button></nav>
 <section id="billing" class="panel">
 <h2>New bill</h2>
 <div class="row"><input id="scanCode" placeholder="Scan / enter barcode" autocomplete="off"><button id="addCode">Add</button></div>
-<div class="row"><button id="cameraScan" class="secondary">📷 Scan barcode with camera</button></div><div id="cameraMsg" class="hint">Camera scan works on HTTPS. Allow camera access when Safari asks.</div>
+<div class="row camera-action"><button id="cameraScan" type="button" class="secondary">📷 Scan barcode with camera</button></div><div id="cameraMsg" class="hint">Camera scan works on HTTPS. Allow camera access when Safari asks.</div>
 <div class="row"><input id="quickName" placeholder="Quick item name"><input id="quickPrice" type="number" min="0" step="0.01" placeholder="Price ₹"><button id="quickAdd">+</button></div>
 <div id="cart" class="list empty">Cart is empty</div><div class="total"><span>Total</span><strong id="total">₹0.00</strong></div>
 <div class="row"><select id="payment"><option>Cash</option><option>UPI</option><option>Card</option><option>Credit</option></select><input id="customer" placeholder="Customer name / phone (optional)"></div>
@@ -33,7 +33,7 @@
 <hr><button id="exportData" class="secondary full">Export local backup (JSON)</button><div id="settingsMessage" class="hint"></div>
 </section>
 </main>
-<footer>Prototype v3 • Use dummy data until full sync and printer testing are complete.</footer>
+<footer>Prototype v4 • Camera buttons included • Use dummy data for testing.</footer>
 <div id="receipt" class="receipt"></div>
 <script src="app.js"></script>
 </body></html>
