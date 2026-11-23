@@ -6,10 +6,10 @@
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="stylesheet" href="style.css"><title>Aashirwaad POS</title>
 </head>
 <body>
-<header><div><strong>Aashirwaad Super Mart</strong><small>Offline-first POS • iPhone prototype v4</small></div><span id="network" class="pill">Checking…</span></header>
+<header><div><strong>Aashirwaad Super Mart</strong><small>Offline-first POS • iPhone prototype v5</small></div><span id="network" class="pill">Checking…</span></header>
 <main>
 <section class="status"><div><small>Sync status</small><strong id="syncStatus">Local only</strong></div><div><small>Pending changes</small><strong id="pendingCount">0</strong></div><button id="syncNow" class="secondary">Sync now</button></section>
-<nav><button class="tab active" data-tab="billing">Billing</button><button class="tab" data-tab="products">Products</button><button class="tab" data-tab="history">Sales</button><button class="tab" data-tab="settings">Settings</button></nav>
+<nav><button class="tab active" data-tab="billing">Billing</button><button class="tab" data-tab="products">Products</button><button class="tab" data-tab="history">Sales</button><button class="tab" data-tab="import">Import</button><button class="tab" data-tab="settings">Settings</button></nav>
 <section id="billing" class="panel">
 <h2>New bill</h2>
 <div class="row"><input id="scanCode" placeholder="Scan / enter barcode" autocomplete="off"><button id="addCode">Add</button></div>
@@ -23,9 +23,18 @@
 </section>
 <section id="products" class="panel hidden">
 <h2>Add product</h2><div class="formgrid">
-<div class="scanfield"><input id="pBarcode" placeholder="Barcode number (scan here or type)" autocomplete="off"><button type="button" id="productCameraScan" class="secondary">📷 Scan barcode with camera</button></div><input id="pName" placeholder="Product name"><div class="row"><input id="pPrice" type="number" min="0" step="0.01" placeholder="Selling price ₹"><input id="pCost" type="number" min="0" step="0.01" placeholder="Purchase cost ₹"></div>
+<div class="scanfield"><input id="pBarcode" placeholder="Barcode number (scan here or type)" autocomplete="off"><button type="button" id="productCameraScan" class="secondary">📷 Scan barcode with camera</button></div><input id="pName" placeholder="Product name"><div id="lookupStatus" class="hint">Scan barcode: saved products are checked first, then online product database.</div><input id="pBrand" placeholder="Brand (optional)"><input id="pCategory" placeholder="Category (e.g. Grocery, Snacks)"><input id="pPack" placeholder="Pack size (e.g. 1 kg, 500 ml)"><input id="pMrp" type="number" min="0" step="0.01" placeholder="MRP ₹ (optional)"><div class="row"><input id="pPrice" type="number" min="0" step="0.01" placeholder="Selling price ₹"><input id="pCost" type="number" min="0" step="0.01" placeholder="Purchase cost ₹"></div>
 <div class="row"><input id="pStock" type="number" min="0" step="1" placeholder="Opening stock"><input id="pExpiry" type="date" aria-label="Expiry date"></div>
 <button id="saveProduct" class="primary full">Save product on this device</button></div><div id="productList" class="list"></div>
+</section>
+<section id="import" class="panel hidden">
+<h2>Bulk product import</h2>
+<p class="hint">Import a supplier/product list in CSV or Excel format. Barcode and Product Name are recommended. Existing stock and prices are not overwritten when those columns are blank.</p>
+<div class="row"><button id="downloadTemplate" class="secondary">Download CSV template</button><button id="exportProductsCsv" class="secondary">Export products CSV</button></div>
+<label for="productFile">Choose CSV or Excel file</label><input id="productFile" type="file" accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+<div class="row"><select id="duplicateMode"><option value="skip">If barcode exists: Skip row</option><option value="update">If barcode exists: Update product details</option></select></div>
+<button id="runImport" class="primary full">Import products</button><div id="importStatus" class="hint" aria-live="polite"></div>
+<p class="hint">Excel support loads SheetJS from the internet when needed. CSV import works without that library. Always export a JSON backup before a large import.</p>
 </section>
 <section id="history" class="panel hidden"><h2>Saved sales</h2><div id="salesList" class="list empty">No sales yet</div></section>
 <section id="settings" class="panel hidden">
@@ -33,7 +42,7 @@
 <hr><button id="exportData" class="secondary full">Export local backup (JSON)</button><div id="settingsMessage" class="hint"></div>
 </section>
 </main>
-<footer>Prototype v4 • Camera buttons included • Use dummy data for testing.</footer>
+<footer>Prototype v5 • Barcode product lookup + bulk import • Use dummy data for testing.</footer>
 <div id="receipt" class="receipt"></div>
 <script src="app.js"></script>
 </body></html>

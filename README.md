@@ -1,16 +1,37 @@
-# Aashirwaad POS — v4 deployment fix
+# Aashirwaad POS v5 — Product database + bulk import
 
-This package is a static offline-first prototype. The visible header/footer now say v4, both camera buttons are explicitly visible, and the service worker cache is bumped to v4. Navigation uses network-first so a new GitHub Pages index can be picked up after deployment.
+This is a static offline-first prototype built on the v4 file set. It keeps the same IndexedDB database name (`aashirwaad_offline_pos`) and upgrades the schema version without deleting existing products or sales.
 
-## GitHub Pages upload (important)
-1. Open repository `aashirwaad-offline-pos` and select the branch/folder configured in Settings → Pages.
-2. Upload the CONTENTS of this ZIP to that published root. `index.html`, `app.js`, `style.css`, `sw.js`, and `manifest.webmanifest` must sit directly in the root, not inside an extra `Aashirwaad_...` folder. Keep the `icons/` folder.
-3. Replace existing files when GitHub asks. Commit changes.
-4. Wait for Pages deployment to complete. Open the URL in Safari and refresh. Do not clear website data or delete local storage.
-5. Confirm the header says `iPhone prototype v4` and footer says `Prototype v4`. Then open Products: the camera button should be directly below Barcode number. In Billing, it should be below the barcode entry row.
+## New features
+- Product Add barcode lookup: local inventory first, then Open Food Facts API when online.
+- Auto-fills available product name, brand, category and pack size. MRP may be absent. Selling price, purchase cost and stock remain the shop's responsibility.
+- Saves product details locally so subsequent barcode lookups work offline.
+- Bulk CSV import (built-in parser) and Excel `.xlsx`/`.xls` import (SheetJS loaded from CDN on demand).
+- CSV template download and product CSV export.
+- Duplicate barcode handling: skip or update; blank incoming values preserve existing values.
+- Existing sales, products, outbox and settings remain in the same IndexedDB database.
+- Service worker cache version bumped to v5.
 
-## Camera notes
-Camera requires HTTPS and Safari camera permission. The scanner library is currently loaded from jsDelivr the first time, so first camera use requires internet. This prototype has not been physically tested on your iPhone.
+## Deploy
+1. Export a JSON backup from current POS Settings before changing files.
+2. Extract this ZIP.
+3. Upload the CONTENTS (not the outer folder) to the GitHub Pages publishing root, replacing `index.html`, `app.js`, `style.css`, `sw.js`, `manifest.webmanifest`; keep `icons/`.
+4. Commit and wait for GitHub Pages deployment.
+5. Open the existing Pages URL. Header/footer should say v5. Do not clear Safari website data.
 
-## Data safety / limitations
-Use dummy products and test bills only until the workflow is validated. Export a JSON backup before changing deployments. No production cloud sync, conflict handling, GST, returns, or complete purchase/supplier ledger is included.
+## Product lookup behaviour
+- Existing local product barcode wins.
+- If not found and online, request `https://world.openfoodfacts.org/api/v2/product/{barcode}.json`.
+- Only available public metadata is populated. Not every Indian grocery barcode is listed; there is no guarantee of full coverage.
+- The online API is not bundled as a complete offline catalogue. A product becomes available offline after a successful lookup and local save.
+- Verify name, brand and pack size before saving. Enter MRP, selling price, purchase cost, stock and expiry based on your supplier/physical pack.
+
+## Bulk import columns
+Accepted header aliases include Barcode/EAN/UPC, Product Name/Name/Item Name, Brand, Category, Pack Size/Quantity, MRP, Selling Price/Price, Purchase Price/Cost, Opening Stock/Stock, Expiry/Expiry Date. Barcode and product name are strongly recommended.
+
+## Important limitations
+- This is still a prototype. It has not been tested on the user's actual iPhone/browser or a real supplier file.
+- Excel reader and camera scanner libraries load from a CDN when needed; first use requires internet. CSV import is built in.
+- The Open Food Facts database is community-contributed and incomplete; MRP may be missing or outdated.
+- No automatic bulk download of all Indian grocery products is included. Do not scrape/download a huge catalogue through individual API calls.
+- Do not use for live shop billing until the user tests on dummy data and verifies backup/restore. No full cloud bidirectional sync or conflict resolution is implemented.
